@@ -17,9 +17,9 @@ BASE_URL = os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1/
 API_KEY = os.getenv("NEBIUS_API_KEY", "")
 
 # Model IDs on Token Factory
-NANO = "nvidia/nemotron-3-nano-30b"
+NANO = "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B"
 SUPER = "nvidia/nemotron-3-super-120b-a12b"
-ULTRA = "nvidia/nemotron-3-ultra-550b"
+ULTRA = "nvidia/Nemotron-3-Ultra-550b-a55b"
 
 DEFAULT_MODEL = SUPER
 

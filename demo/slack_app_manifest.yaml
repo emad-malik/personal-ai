@@ -1,0 +1,20 @@
+# Slack app manifest for the Content Dev Copilot bot.
+# Import this in https://api.slack.com/apps to create the demo app.
+
+display_information:
+  name: Content Dev Copilot
+  description: AI copilot for bootcamp content development
+  background_color: "#1a1a2e"
+
+features:
+  bot_user:
+    display_name: ContentCopilot
+    always_online: true
+
+oauth_config:
+  scopes:
+    bot:
+      - channels:history
+      - channels:read
+      - chat:write
+      - users:read

@@ -1,0 +1,29 @@
+[project]
+name = "personal-ai"
+version = "0.1.0"
+description = "Private AI copilot for bootcamp content development — monitors Slack, plans work, generates lecture notebooks."
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "openai>=1.30",
+    "slack-sdk>=3.27",
+    "nbformat>=5.10",
+    "nbclient>=0.10",
+    "chromadb>=0.5",
+    "streamlit>=1.35",
+    "python-dotenv>=1.0",
+    "tavily-python>=0.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]

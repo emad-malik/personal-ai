@@ -1,0 +1,17 @@
+# NemoClaw / OpenShell sandbox policy.
+# Stage 5: restrict network access and file permissions.
+
+network:
+  allow:
+    - api.tokenfactory.nebius.com
+    - api.tavily.com
+    - slack.com
+  deny_all_other: true
+
+filesystem:
+  writable:
+    - ./outputs
+    - ./chroma_data
+  read_only:
+    - ./copilot
+    - ./agent

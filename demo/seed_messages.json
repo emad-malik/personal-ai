@@ -1,0 +1,27 @@
+[
+  {
+    "user": "lead_instructor",
+    "text": "We need the pandas intro notebook ready by Oct 15. Focus on DataFrame basics, indexing, and simple aggregations.",
+    "ts": "2026-10-01T09:00:00Z"
+  },
+  {
+    "user": "curriculum_pm",
+    "text": "DE bootcamp: add a module on Spark DataFrames after the pandas section. Target date Oct 20.",
+    "ts": "2026-10-01T10:30:00Z"
+  },
+  {
+    "user": "lead_instructor",
+    "text": "Cloud bootcamp slides for AWS S3 are done. Next up: IAM basics notebook. Let's aim for Oct 18.",
+    "ts": "2026-10-02T11:00:00Z"
+  },
+  {
+    "user": "content_reviewer",
+    "text": "The SQL joins notebook needs more practice exercises. At least 5 graded questions.",
+    "ts": "2026-10-02T14:00:00Z"
+  },
+  {
+    "user": "curriculum_pm",
+    "text": "Priority change: move the ML intro notebook ahead of the stats review. New deadline Oct 12.",
+    "ts": "2026-10-03T08:15:00Z"
+  }
+]

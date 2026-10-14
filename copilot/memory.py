@@ -43,6 +43,12 @@ CREATE TABLE IF NOT EXISTS approvals (
     dm_ts TEXT
 );
 
+CREATE TABLE IF NOT EXISTS ingested (
+    key TEXT PRIMARY KEY,
+    ts TEXT NOT NULL,
+    at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS audit_log (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ts TEXT NOT NULL,
@@ -77,6 +83,26 @@ def connect(db_path: str | None = None):
 def reset(db_path: str | None = None) -> None:
     with connect(db_path) as con:
         con.execute("DELETE FROM items")
+        con.execute("DELETE FROM ingested")
+
+
+def msg_key(msg: dict) -> str:
+    """Stable id for a Slack message. An edited message gets a new key."""
+    import hashlib
+    raw = f"{msg['ts']}|{msg['user']}|{msg['text']}"
+    return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+
+def is_ingested(key: str, db_path: str | None = None) -> bool:
+    with connect(db_path) as con:
+        return con.execute("SELECT 1 FROM ingested WHERE key=?", (key,)).fetchone() is not None
+
+
+def mark_ingested(key: str, ts: str, db_path: str | None = None) -> None:
+    from datetime import datetime, timezone
+    with connect(db_path) as con:
+        con.execute("INSERT OR IGNORE INTO ingested (key, ts, at) VALUES (?,?,?)",
+                    (key, ts, datetime.now(timezone.utc).isoformat()))
 
 
 def add_item(

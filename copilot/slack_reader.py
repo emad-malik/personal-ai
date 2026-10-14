@@ -116,7 +116,8 @@ def _parse_json(raw: str) -> list[dict] | None:
     return [d for d in data if isinstance(d, dict)]
 
 
-def extract_items(message: dict, known_topics: list[str], model: str = NANO) -> list[dict]:
+def extract_items(message: dict, known_topics: list[str], model: str = NANO) -> list[dict] | None:
+    """Returns None when the model output was unusable (message stays unprocessed)."""
     prompt = EXTRACT_PROMPT.format(
         year=message["ts"][:4],
         topics=", ".join(known_topics) if known_topics else "(none yet)",
@@ -132,7 +133,7 @@ def extract_items(message: dict, known_topics: list[str], model: str = NANO) -> 
         if items is not None:
             return items
         print(f"    WARNING: unusable model output (attempt {attempt}): {raw[:120]!r}")
-    return []
+    return None
 
 
 def apply_items(items: list[dict], message: dict, db_path: str | None = None) -> int:
@@ -169,15 +170,24 @@ def apply_items(items: list[dict], message: dict, db_path: str | None = None) ->
 def ingest(messages: list[dict], model: str = NANO, db_path: str | None = None,
            verbose: bool = True) -> int:
     """Run extraction over messages in time order and update memory."""
-    total = 0
+    total = skipped = 0
     for i, msg in enumerate(sorted(messages, key=lambda m: m["ts"]), 1):
+        key = memory.msg_key(msg)
+        if memory.is_ingested(key, db_path):
+            skipped += 1
+            continue
         topics = sorted({d["topic"] for s in ("active", "done") for d in
                          memory.list_deadlines(s, db_path)})
         items = extract_items(msg, topics, model=model)
+        if items is None:
+            continue  # retried on the next run
         applied = apply_items(items, msg, db_path)
         total += applied
+        memory.mark_ingested(key, msg["ts"], db_path)
         if verbose:
             print(f"  [{i}] {msg['user'].split(' (')[0]}: {applied} item(s)")
             for it in items:
                 print(f"       {it.get('kind')}: {it.get('topic')} {it.get('due_date') or it.get('status') or ''}")
+    if verbose:
+        print(f"  {skipped} message(s) already ingested, skipped")
     return total

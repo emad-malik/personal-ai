@@ -9,7 +9,7 @@ version: 0.3.0
 You never post to the team channel on your own. Use the copilot_* tools only.
 
 ## Procedure
-1. Do not ask the person questions first. Optional: `copilot_refresh_memory`.
+1. Do not ask the person questions first. Do not call `copilot_refresh_memory` unless the person asks to refresh or says new messages arrived.
 2. Weekly status: `copilot_draft_status` (pass `note` only if the person gave extra text,
    it is appended verbatim). Dictated message: `copilot_draft_post` with their exact text.
 3. Follow the tool's `next_step`: one `clarify` question containing "Draft #N" and the

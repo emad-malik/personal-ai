@@ -128,3 +128,27 @@ def test_send_file_to_channel_thread_and_home(tmp_path, monkeypatch):
     assert seen["channel"] == "C99" and seen["thread_ts"] == "1.2"
     slack_send.upload_file(str(f), channel="C5", client=FakeClient())
     assert seen["channel"] == "C5" and seen["thread_ts"] is None
+
+
+def test_ingest_skips_already_processed(tmp_path, monkeypatch):
+    from copilot import slack_reader
+    db = str(tmp_path / "m.db")
+    calls = []
+    monkeypatch.setattr(slack_reader, "extract_items",
+                        lambda msg, topics, model=None: calls.append(msg["text"]) or [])
+    msgs = [{"user": "A", "text": "hi", "ts": "2026-10-01T00:00:00+00:00"}]
+    slack_reader.ingest(msgs, db_path=db, verbose=False)
+    slack_reader.ingest(msgs + [{"user": "A", "text": "new", "ts": "2026-10-02T00:00:00+00:00"}],
+                        db_path=db, verbose=False)
+    assert calls == ["hi", "new"]
+
+
+def test_failed_extraction_is_retried(tmp_path, monkeypatch):
+    from copilot import slack_reader
+    db = str(tmp_path / "m.db")
+    results = iter([None, []])
+    monkeypatch.setattr(slack_reader, "extract_items", lambda *a, **k: next(results))
+    msgs = [{"user": "A", "text": "hi", "ts": "2026-10-01T00:00:00+00:00"}]
+    slack_reader.ingest(msgs, db_path=db, verbose=False)
+    slack_reader.ingest(msgs, db_path=db, verbose=False)
+    assert next(results, "exhausted") == "exhausted"

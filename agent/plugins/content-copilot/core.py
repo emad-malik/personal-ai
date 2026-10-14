@@ -180,7 +180,7 @@ def _drafted(out: dict, gate: Gate) -> str:
 # ---------------------------------------------------------------- tool handlers
 def make_handlers(gate: Gate = GATE, runner=run_cli) -> dict:
     def refresh(params, **kw):
-        out = runner("ingest", "--slack", "--reset", timeout=420)
+        out = runner("ingest", "--slack", timeout=420)
         return json.dumps({"success": out["ok"], "detail": out["output"][-400:] or out["error"]})
 
     def plan(params, **kw):

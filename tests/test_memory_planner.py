@@ -73,3 +73,10 @@ def test_apply_items_skips_bad_model_output(tmp_path):
 def test_seed_file_loads():
     msgs = slack_reader.load_seed()
     assert len(msgs) == 28 and {"user", "text", "ts"} <= set(msgs[0])
+
+
+def test_parse_json_handles_think_fences_and_truncation():
+    assert slack_reader._parse_json("<think>hmm [x]</think>```json\n[]\n```") == []
+    assert slack_reader._parse_json('[{"kind":"decision","topic":"general"}]')[0]["kind"] == "decision"
+    assert slack_reader._parse_json('[{"kind":"deadline","topic":"A"') is None  # truncated
+    assert slack_reader._parse_json("") is None

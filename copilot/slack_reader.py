@@ -98,16 +98,22 @@ Message: {text}
 Return ONLY the JSON array."""
 
 
-def _parse_json(raw: str) -> list[dict]:
-    text = raw.strip()
+def _parse_json(raw: str) -> list[dict] | None:
+    """Parse the model's JSON array. Returns None when the output is unusable
+    (empty, truncated, no array), so callers can tell that apart from a real []."""
+    text = re.sub(r"<think>.*?</think>", "", raw or "", flags=re.DOTALL).strip()
     if text.startswith("```"):
         text = "\n".join(text.split("\n")[1:])
         if text.endswith("```"):
             text = text[:-3]
     start, end = text.find("["), text.rfind("]")
-    if start == -1 or end == -1:
-        return []
-    return json.loads(text[start : end + 1])
+    if start == -1 or end <= start:
+        return None
+    try:
+        data = json.loads(text[start : end + 1])
+    except json.JSONDecodeError:
+        return None
+    return [d for d in data if isinstance(d, dict)]
 
 
 def extract_items(message: dict, known_topics: list[str], model: str = NANO) -> list[dict]:
@@ -118,7 +124,15 @@ def extract_items(message: dict, known_topics: list[str], model: str = NANO) -> 
         user=message["user"],
         text=message["text"],
     )
-    return _parse_json(chat(prompt, model=model, temperature=0.0, max_tokens=512))
+    # Generous budget: Nemotron may reason before answering, and a message with
+    # several deadlines needs a long array. A small cap truncates silently.
+    for attempt in (1, 2):
+        raw = chat(prompt, model=model, temperature=0.0, max_tokens=4096)
+        items = _parse_json(raw)
+        if items is not None:
+            return items
+        print(f"    WARNING: unusable model output (attempt {attempt}): {raw[:120]!r}")
+    return []
 
 
 def apply_items(items: list[dict], message: dict, db_path: str | None = None) -> int:
@@ -164,4 +178,6 @@ def ingest(messages: list[dict], model: str = NANO, db_path: str | None = None,
         total += applied
         if verbose:
             print(f"  [{i}] {msg['user'].split(' (')[0]}: {applied} item(s)")
+            for it in items:
+                print(f"       {it.get('kind')}: {it.get('topic')} {it.get('due_date') or it.get('status') or ''}")
     return total

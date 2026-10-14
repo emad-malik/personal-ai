@@ -83,7 +83,7 @@ def cmd_send_file(args: argparse.Namespace) -> None:
     from copilot import slack_send
 
     link = slack_send.upload_file(args.path, user_id=args.user, channel=args.channel,
-                                  comment=args.comment)
+                                  comment=args.comment, thread_ts=args.thread_ts)
     print(f"Uploaded {os.path.basename(args.path)} to Slack. {link}")
 
 
@@ -144,7 +144,8 @@ def main() -> None:
     f = sub.add_parser("send-file", help="Upload a file to Slack (DM to you by default)")
     f.add_argument("path")
     f.add_argument("--user", help="Slack member ID (default: first SLACK_ALLOWED_USERS)")
-    f.add_argument("--channel", help="Channel ID instead of a DM")
+    f.add_argument("--channel", help='Channel ID, or "home" for SLACK_CHANNEL_ID, instead of a DM')
+    f.add_argument("--thread-ts", help="Post into this thread (the timestamp of the request message)")
     f.add_argument("--comment")
 
     i = sub.add_parser("ingest", help="Extract deadlines, decisions, feedback into memory")

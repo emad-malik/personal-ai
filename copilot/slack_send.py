@@ -22,8 +22,13 @@ def _default_user() -> str:
 
 
 def upload_file(path: str, *, user_id: str | None = None, channel: str | None = None,
-                comment: str | None = None, client=None) -> str:
-    """Upload path to a channel, or to a DM with user_id. Returns the file permalink."""
+                comment: str | None = None, thread_ts: str | None = None,
+                client=None) -> str:
+    """Upload path to a channel (optionally into a thread), or to a DM with user_id.
+
+    channel may be a channel ID or "home", meaning SLACK_CHANNEL_ID from .env.
+    Returns the file permalink.
+    """
     if not os.path.isfile(path):
         raise FileNotFoundError(path)
     if client is None:
@@ -33,6 +38,10 @@ def upload_file(path: str, *, user_id: str | None = None, channel: str | None = 
         if not token:
             raise RuntimeError("SLACK_BOT_TOKEN is not set")
         client = WebClient(token=token)
+    if channel == "home":
+        channel = os.getenv("SLACK_CHANNEL_ID")
+        if not channel:
+            raise RuntimeError("SLACK_CHANNEL_ID is not set")
     if channel is None:
         channel = client.conversations_open(users=user_id or _default_user())["channel"]["id"]
     resp = client.files_upload_v2(
@@ -40,6 +49,7 @@ def upload_file(path: str, *, user_id: str | None = None, channel: str | None = 
         file=path,
         title=os.path.basename(path),
         initial_comment=comment,
+        thread_ts=thread_ts,
     )
     f = resp.get("file") or (resp.get("files") or [{}])[0]
     return f.get("permalink", "")

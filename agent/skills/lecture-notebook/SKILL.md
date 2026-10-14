@@ -25,9 +25,13 @@ no em dashes) and the remembered Slack decisions (dataset, scope, reviewer feedb
 3. The build makes about 10 model calls and takes a few minutes. Run it in the
    background and poll the process, do not give up on a slow command.
 4. When it finishes, read the line starting with "Notebook file:" and the line
-   "Memory constraints:". Then upload the notebook to the user. The chat gateway
-   does not upload .ipynb files on its own, so use our uploader:
-   `cd ~/code/personal-ai && uv run python -m copilot.cli send-file "<Notebook file path>" --comment "<topic>, due <date>"`
+   "Memory constraints:". Then upload the notebook where the request came from.
+   The chat gateway does not upload .ipynb files on its own, so use our uploader:
+   - Request came from a channel: add `--channel <that channel's ID>`. If the request
+     was in a thread, also add `--thread-ts <thread timestamp>`. If you cannot tell the
+     channel ID but know it was a channel, use `--channel home`.
+   - Request came from a direct message: add nothing, it goes to the user's DM.
+   `cd ~/code/personal-ai && uv run python -m copilot.cli send-file "<Notebook file path>" --comment "<topic>, due <date>" [--channel ...] [--thread-ts ...]`
 5. Reply with the topic and due date, which remembered decisions were applied, and
    confirm the upload. Do not write the file path as plain text, and never paste the
    notebook contents into the chat.

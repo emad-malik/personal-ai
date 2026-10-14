@@ -106,3 +106,25 @@ def test_send_file_missing(tmp_path):
     from copilot import slack_send
     with pytest.raises(FileNotFoundError):
         slack_send.upload_file(str(tmp_path / "nope.ipynb"), client=object())
+
+
+def test_send_file_to_channel_thread_and_home(tmp_path, monkeypatch):
+    from copilot import slack_send
+
+    f = tmp_path / "a.ipynb"
+    f.write_text("{}")
+    monkeypatch.setenv("SLACK_CHANNEL_ID", "C99")
+    seen = {}
+
+    class FakeClient:
+        def conversations_open(self, users):
+            raise AssertionError("must not open a DM for a channel upload")
+
+        def files_upload_v2(self, **kw):
+            seen.update(kw)
+            return {"file": {"permalink": "p"}}
+
+    slack_send.upload_file(str(f), channel="home", thread_ts="1.2", client=FakeClient())
+    assert seen["channel"] == "C99" and seen["thread_ts"] == "1.2"
+    slack_send.upload_file(str(f), channel="C5", client=FakeClient())
+    assert seen["channel"] == "C5" and seen["thread_ts"] is None

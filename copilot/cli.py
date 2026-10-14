@@ -6,6 +6,8 @@ Usage:
     python -m copilot.cli ingest --seed          # extract memory from demo/seed_messages.json
     python -m copilot.cli ingest --slack         # extract memory from the live channel
     python -m copilot.cli build-next             # next due topic, with remembered decisions
+    python -m copilot.cli draft-status           # queue the weekly update for approval
+    python -m copilot.cli approval-bot           # run the button listener
     python -m copilot.cli plan --today 2026-10-17
     python -m copilot.cli memory
 """
@@ -87,6 +89,46 @@ def cmd_send_file(args: argparse.Namespace) -> None:
     print(f"Uploaded {os.path.basename(args.path)} to Slack. {link}")
 
 
+def cmd_draft_post(args: argparse.Namespace) -> None:
+    """Queue a channel post for approval. The post is NEVER sent from here."""
+    from copilot import approval_bot, approvals
+
+    draft_id = approvals.create_draft(args.text, channel=args.channel)
+    print(f"Draft #{draft_id} queued (pending approval).")
+    if not args.no_notify:
+        approval_bot.notify(draft_id)
+        print("Sent to your DM with Approve / Edit / Discard buttons. Nothing is posted yet.")
+
+
+def cmd_draft_status(args: argparse.Namespace) -> None:
+    from copilot import planner
+
+    args.text = planner.status_update(date.fromisoformat(args.today) if args.today else None)
+    args.channel = "home"
+    print(args.text, "\n")
+    cmd_draft_post(args)
+
+
+def cmd_approvals(args: argparse.Namespace) -> None:
+    from copilot import approvals
+
+    for d in approvals.list_by_status(None if args.status == "all" else args.status):
+        print(f"#{d['id']} [{d['status']}] -> {d['channel']}: {d['body'][:70]!r}")
+
+
+def cmd_audit(args: argparse.Namespace) -> None:
+    from copilot import approvals
+
+    for r in reversed(approvals.audit_log(args.limit)):
+        print(f"{r['ts']}  {r['actor']:<8} {r['action']:<22} {r['detail']}")
+
+
+def cmd_approval_bot(args: argparse.Namespace) -> None:
+    from copilot import approval_bot
+
+    approval_bot.run()
+
+
 def cmd_ingest(args: argparse.Namespace) -> None:
     from copilot import memory, slack_reader
 
@@ -148,6 +190,23 @@ def main() -> None:
     f.add_argument("--thread-ts", help="Post into this thread (the timestamp of the request message)")
     f.add_argument("--comment")
 
+    d = sub.add_parser("draft-post", help="Queue a channel post for your approval")
+    d.add_argument("text")
+    d.add_argument("--channel", default="home", help='Channel ID or "home"')
+    d.add_argument("--no-notify", action="store_true", help="Queue only, no Slack DM")
+
+    ds = sub.add_parser("draft-status", help="Queue this week's status update for approval")
+    ds.add_argument("--today", help="YYYY-MM-DD")
+    ds.add_argument("--no-notify", action="store_true")
+
+    ap = sub.add_parser("approvals", help="List drafts")
+    ap.add_argument("--status", default="pending", help="pending|posted|discarded|failed|all")
+
+    au = sub.add_parser("audit", help="Show the audit log")
+    au.add_argument("--limit", type=int, default=30)
+
+    sub.add_parser("approval-bot", help="Run the Approve/Edit/Discard button listener")
+
     i = sub.add_parser("ingest", help="Extract deadlines, decisions, feedback into memory")
     src = i.add_mutually_exclusive_group(required=True)
     src.add_argument("--seed", action="store_true", help="Read demo/seed_messages.json")
@@ -162,7 +221,7 @@ def main() -> None:
 
     args = parser.parse_args()
     {"hello": cmd_hello, "build": cmd_build, "build-next": cmd_build_next, "validate": cmd_validate,
-     "ingest": cmd_ingest, "send-file": cmd_send_file, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
+     "ingest": cmd_ingest, "draft-post": cmd_draft_post, "draft-status": cmd_draft_status, "approvals": cmd_approvals, "audit": cmd_audit, "approval-bot": cmd_approval_bot, "send-file": cmd_send_file, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
 
 
 if __name__ == "__main__":

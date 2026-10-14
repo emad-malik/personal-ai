@@ -28,6 +28,28 @@ CREATE TABLE IF NOT EXISTS items (
     source_ts TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_items_kind_status ON items(kind, status);
+
+CREATE TABLE IF NOT EXISTS approvals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    body TEXT NOT NULL,
+    channel TEXT NOT NULL DEFAULT 'home',
+    status TEXT NOT NULL DEFAULT 'pending',  -- pending | approved | posted | failed | discarded
+    created_ts TEXT NOT NULL,
+    decided_ts TEXT,
+    decided_by TEXT,
+    posted_ts TEXT,
+    error TEXT,
+    dm_channel TEXT,
+    dm_ts TEXT
+);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts TEXT NOT NULL,
+    actor TEXT NOT NULL,
+    action TEXT NOT NULL,
+    detail TEXT
+);
 """
 
 

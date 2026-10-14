@@ -24,8 +24,8 @@ command sorts deadlines and applies changes exactly.
 
 ## Pitfalls
 - Ingest takes a minute. Wait for it.
-- Never post to the channel. Only reply to the person who asked. Channel posts need
-  the approval queue (added in a later stage).
+- Never post to the channel. Only reply to the person who asked. To put anything in the
+  channel, use the channel-update skill, which goes through the approval queue.
 
 ## Verification
 The due list in the reply matches the "Due" section printed by the plan command.

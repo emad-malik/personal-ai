@@ -84,3 +84,20 @@ def build_constraints(topic: str, db_path: str | None = None) -> str:
     """Turn remembered decisions and feedback into a constraints string for the generator."""
     ctx = memory.query_context(topic, db_path)
     return "; ".join(re.sub(r"\s+", " ", c["summary"]) for c in ctx)
+
+
+def status_update(today: date | None = None, db_path: str | None = None) -> str:
+    """Plain-text weekly status for the channel, built from memory (no LLM)."""
+    today = today or date.today()
+    items = due_list(today, db_path)
+    done = memory.list_deadlines("done", db_path)
+    cancelled = memory.list_deadlines("cancelled", db_path)
+    lines = [f"Content status for the week of {today.strftime('%b %d, %Y')}", ""]
+    lines.append("Done: " + (", ".join(d["topic"] for d in done) or "nothing yet"))
+    lines.append("Coming up:")
+    for d in items:
+        moved = f", moved from {d['was']}" if d["was"] and d["was"] != d["due_date"] else ""
+        lines.append(f"- {d['topic']}, due {d['due_date']}, {d['owner'] or 'unassigned'}{moved}")
+    if cancelled:
+        lines.append("Dropped: " + ", ".join(d["topic"] for d in cancelled))
+    return "\n".join(lines)

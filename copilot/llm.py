@@ -52,7 +52,7 @@ def chat(
         temperature=temperature,
         max_tokens=max_tokens,
     )
-    return resp.choices[0].message.content
+    return resp.choices[0].message.content or ""
 
 
 # ---------------------------------------------------------------------------

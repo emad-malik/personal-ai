@@ -1,27 +1,142 @@
 [
   {
-    "user": "lead_instructor",
-    "text": "We need the pandas intro notebook ready by Oct 15. Focus on DataFrame basics, indexing, and simple aggregations.",
+    "user": "Maya (Team Lead)",
+    "text": "Kickoff for the DS bootcamp content sprint. Weeks 1 to 3 notebooks are ours. Pandas Basics is due Oct 19 and Data Cleaning and EDA is due Oct 21. Omar owns Pandas Basics, Lena owns Data Cleaning and EDA.",
     "ts": "2026-10-01T09:00:00Z"
   },
   {
-    "user": "curriculum_pm",
-    "text": "DE bootcamp: add a module on Spark DataFrames after the pandas section. Target date Oct 20.",
-    "ts": "2026-10-01T10:30:00Z"
+    "user": "Omar (Content Dev)",
+    "text": "Got it. Pandas Basics by Oct 19. I will cover DataFrame basics, indexing and simple aggregations.",
+    "ts": "2026-10-01T09:12:00Z"
   },
   {
-    "user": "lead_instructor",
-    "text": "Cloud bootcamp slides for AWS S3 are done. Next up: IAM basics notebook. Let's aim for Oct 18.",
-    "ts": "2026-10-02T11:00:00Z"
+    "user": "Lena (Content Dev)",
+    "text": "Data Cleaning and EDA by Oct 21, noted. Can I use a messy CSV I make up, or should we use a known dataset?",
+    "ts": "2026-10-01T09:20:00Z"
   },
   {
-    "user": "content_reviewer",
-    "text": "The SQL joins notebook needs more practice exercises. At least 5 graded questions.",
-    "ts": "2026-10-02T14:00:00Z"
+    "user": "Maya (Team Lead)",
+    "text": "Known datasets only. Students should be able to find the source. Use Titanic for cleaning, it has missing values in Age and Cabin.",
+    "ts": "2026-10-01T09:31:00Z"
   },
   {
-    "user": "curriculum_pm",
-    "text": "Priority change: move the ML intro notebook ahead of the stats review. New deadline Oct 12.",
-    "ts": "2026-10-03T08:15:00Z"
+    "user": "Maya (Team Lead)",
+    "text": "Style reminder from the reviewer: every notebook needs an exercise with a checkable answer. No open ended 'explore the data' prompts.",
+    "ts": "2026-10-02T10:05:00Z"
+  },
+  {
+    "user": "Omar (Content Dev)",
+    "text": "Also one topic per notebook, one teaching day each. If pandas gets too long I will split indexing out.",
+    "ts": "2026-10-02T10:20:00Z"
+  },
+  {
+    "user": "Omar (Content Dev)",
+    "text": "Thai place again on Friday?",
+    "ts": "2026-10-02T15:40:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Week 3 is machine learning. Linear Regression is due Oct 23, KNN Classification is due Oct 28, K-Means Clustering is due Oct 30.",
+    "ts": "2026-10-03T09:10:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Assignments for week 3: Omar takes Linear Regression and K-Means. Lena takes KNN.",
+    "ts": "2026-10-03T09:25:00Z"
+  },
+  {
+    "user": "Lena (Content Dev)",
+    "text": "KNN is mine, Oct 28.",
+    "ts": "2026-10-03T09:40:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Decision for week 3: use the Titanic dataset throughout so students see one dataset across all three notebooks. No deep learning anywhere in week 3.",
+    "ts": "2026-10-06T11:00:00Z"
+  },
+  {
+    "user": "Omar (Content Dev)",
+    "text": "Titanic for linear regression is a bit odd, but predicting Fare from Pclass and Age works. I will do that.",
+    "ts": "2026-10-06T11:15:00Z"
+  },
+  {
+    "user": "Omar (Content Dev)",
+    "text": "Heads up, I am in live sessions Thursday and Friday. Pandas Basics might slip.",
+    "ts": "2026-10-07T14:00:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Keep Oct 19 for pandas. If it gets tight, tell me by the 15th.",
+    "ts": "2026-10-07T14:10:00Z"
+  },
+  {
+    "user": "Lena (Content Dev)",
+    "text": "Draft of Data Cleaning and EDA is in the shared folder. Reviewer comments welcome.",
+    "ts": "2026-10-08T09:30:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Reviewed the Data Cleaning draft. The imputation section is good. Code cells are too long though. Split missing value handling into one cell per concept and add a markdown explanation before each new function.",
+    "ts": "2026-10-08T16:00:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Schedule change: the stats review slipped a week, so Linear Regression moves from Oct 23 to Oct 26. KNN and K-Means dates stay.",
+    "ts": "2026-10-09T10:00:00Z"
+  },
+  {
+    "user": "Omar (Content Dev)",
+    "text": "Thanks, Oct 26 for Linear Regression works much better.",
+    "ts": "2026-10-09T10:10:00Z"
+  },
+  {
+    "user": "Lena (Content Dev)",
+    "text": "Question: should KNN include feature scaling in the same notebook?",
+    "ts": "2026-10-10T13:00:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Yes, scaling goes inside KNN because it shows why distance matters. The standalone Feature Scaling notebook is cancelled, drop it.",
+    "ts": "2026-10-10T13:20:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Added to the plan: Model Evaluation with cross validation, due Nov 4. Lena owns it. Same rule, Titanic only.",
+    "ts": "2026-10-13T09:00:00Z"
+  },
+  {
+    "user": "Lena (Content Dev)",
+    "text": "Model Evaluation by Nov 4, got it.",
+    "ts": "2026-10-13T09:15:00Z"
+  },
+  {
+    "user": "Omar (Content Dev)",
+    "text": "Pandas Basics first draft is in the folder, ahead of the Oct 19 deadline.",
+    "ts": "2026-10-14T11:30:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Reviewer feedback on Pandas Basics: great header, but the conclusion must say where pandas sits next to Polars and SQL in industry. Omar, please fix before Oct 19.",
+    "ts": "2026-10-15T10:00:00Z"
+  },
+  {
+    "user": "Omar (Content Dev)",
+    "text": "Will do.",
+    "ts": "2026-10-15T10:20:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "One more constraint for K-Means: matplotlib only for plots, no seaborn. Keeps the install light.",
+    "ts": "2026-10-16T09:00:00Z"
+  },
+  {
+    "user": "Lena (Content Dev)",
+    "text": "Data Cleaning and EDA is finished and reviewed. Marking it done.",
+    "ts": "2026-10-16T09:30:00Z"
+  },
+  {
+    "user": "Maya (Team Lead)",
+    "text": "Process change: a status update goes to this channel every Friday. Copilot, draft it and send it to me for approval first. Nothing gets posted without my OK.",
+    "ts": "2026-10-16T15:00:00Z"
   }
 ]

@@ -7,9 +7,7 @@ provider:
   api_key: ${NEBIUS_API_KEY}
   model: nvidia/nemotron-3-super-120b-a12b
 
-memory:
-  backend: chromadb
-  persist_directory: ./chroma_data
+# Memory: deadlines live in SQLite (copilot/memory.py). Hermes built-in memory is wired in Stage 3.
 
 gateway:
   slack:

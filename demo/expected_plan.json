@@ -1,0 +1,47 @@
+{
+  "as_of": "2026-10-17",
+  "active_deadlines": [
+    {
+      "topic": "Pandas Basics",
+      "due": "2026-10-19",
+      "owner": "Omar"
+    },
+    {
+      "topic": "Linear Regression",
+      "due": "2026-10-26",
+      "owner": "Omar"
+    },
+    {
+      "topic": "KNN Classification",
+      "due": "2026-10-28",
+      "owner": "Lena"
+    },
+    {
+      "topic": "K-Means Clustering",
+      "due": "2026-10-30",
+      "owner": "Omar"
+    },
+    {
+      "topic": "Model Evaluation",
+      "due": "2026-11-04",
+      "owner": "Lena"
+    }
+  ],
+  "completed": [
+    "Data Cleaning and EDA"
+  ],
+  "cancelled": [
+    "Feature Scaling"
+  ],
+  "changed": {
+    "Linear Regression": {
+      "from": "2026-10-23",
+      "to": "2026-10-26"
+    }
+  },
+  "decisions": [
+    "Titanic dataset throughout week 3",
+    "No deep learning in week 3",
+    "matplotlib only for K-Means, no seaborn"
+  ]
+}

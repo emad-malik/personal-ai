@@ -1,12 +1,18 @@
 # Slack app manifest for the Content Dev Copilot bot.
-# Import this in https://api.slack.com/apps to create the demo app.
+# Import at https://api.slack.com/apps -> Create New App -> From a manifest.
+# Scopes and events follow the Hermes Agent Slack gateway docs (Socket Mode).
+# chat:write.customize is only used by demo/seed_slack.py to post as pseudo users.
 
 display_information:
   name: Content Dev Copilot
-  description: AI copilot for bootcamp content development
+  description: Private AI copilot for bootcamp content development
   background_color: "#1a1a2e"
 
 features:
+  app_home:
+    home_tab_enabled: false
+    messages_tab_enabled: true
+    messages_tab_read_only_enabled: false
   bot_user:
     display_name: ContentCopilot
     always_online: true
@@ -14,7 +20,31 @@ features:
 oauth_config:
   scopes:
     bot:
+      - app_mentions:read
       - channels:history
       - channels:read
       - chat:write
+      - chat:write.customize
+      - files:read
+      - files:write
+      - groups:history
+      - im:history
+      - im:read
+      - im:write
+      - mpim:history
+      - mpim:read
       - users:read
+
+settings:
+  event_subscriptions:
+    bot_events:
+      - app_mention
+      - message.channels
+      - message.groups
+      - message.im
+      - message.mpim
+  interactivity:
+    is_enabled: true
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false

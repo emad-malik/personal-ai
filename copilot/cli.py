@@ -91,13 +91,57 @@ def cmd_send_file(args: argparse.Namespace) -> None:
 
 def cmd_draft_post(args: argparse.Namespace) -> None:
     """Queue a channel post for approval. The post is NEVER sent from here."""
-    from copilot import approval_bot, approvals
+    from copilot import approvals
 
     draft_id = approvals.create_draft(args.text, channel=args.channel)
-    print(f"Draft #{draft_id} queued (pending approval).")
-    if not args.no_notify:
+    print(f"Draft #{draft_id} queued (pending approval). Nothing has been posted.")
+    print(f"Draft text:\n{args.text}")
+    if args.buttons:  # optional: Block Kit buttons via a separate approvals app
+        from copilot import approval_bot
+
         approval_bot.notify(draft_id)
-        print("Sent to your DM with Approve / Edit / Discard buttons. Nothing is posted yet.")
+        print("Button message sent to your DM.")
+
+
+def _slack_client():
+    from slack_sdk import WebClient
+
+    return WebClient(token=os.environ["SLACK_BOT_TOKEN"])
+
+
+def _human() -> str:
+    from copilot import approval_bot
+
+    allowed = approval_bot._allowed()
+    if not allowed:
+        raise SystemExit("Set SLACK_ALLOWED_USERS in .env")
+    return allowed[0]
+
+
+def cmd_approve(args: argparse.Namespace) -> None:
+    """Post a pending draft to the channel. Run only after the person chose Approve."""
+    from copilot import approval_bot
+
+    result = approval_bot.on_approve(_slack_client(), args.id, _human())
+    print({"posted": f"Draft #{args.id} posted to the channel.",
+           "already_handled": f"Draft #{args.id} was already handled. Nothing posted.",
+           "failed": f"Draft #{args.id} failed to post. See: copilot.cli approvals --status failed",
+           "not_allowed": "Not allowed."}[result])
+
+
+def cmd_discard(args: argparse.Namespace) -> None:
+    from copilot import approval_bot
+
+    result = approval_bot.on_discard(_slack_client(), args.id, _human())
+    print(f"Draft #{args.id}: {result}. Nothing was posted.")
+
+
+def cmd_edit(args: argparse.Namespace) -> None:
+    from copilot import approval_bot
+
+    result = approval_bot.on_edit_submit(_slack_client(), args.id, _human(), args.text)
+    print(f"Draft #{args.id}: {result}. Still pending approval." if result == "edited"
+          else f"Draft #{args.id}: {result}.")
 
 
 def cmd_draft_status(args: argparse.Namespace) -> None:
@@ -193,11 +237,20 @@ def main() -> None:
     d = sub.add_parser("draft-post", help="Queue a channel post for your approval")
     d.add_argument("text")
     d.add_argument("--channel", default="home", help='Channel ID or "home"')
-    d.add_argument("--no-notify", action="store_true", help="Queue only, no Slack DM")
+    d.add_argument("--buttons", action="store_true",
+                   help="Also DM Block Kit buttons (needs the separate approvals app)")
+
+    for name, helptext in (("approve", "Post a pending draft (after the person approved)"),
+                           ("discard", "Discard a pending draft")):
+        x = sub.add_parser(name, help=helptext)
+        x.add_argument("id", type=int)
+    ed = sub.add_parser("edit", help="Replace the text of a pending draft")
+    ed.add_argument("id", type=int)
+    ed.add_argument("text")
 
     ds = sub.add_parser("draft-status", help="Queue this week's status update for approval")
     ds.add_argument("--today", help="YYYY-MM-DD")
-    ds.add_argument("--no-notify", action="store_true")
+    ds.add_argument("--buttons", action="store_true", help="Also DM Block Kit buttons")
 
     ap = sub.add_parser("approvals", help="List drafts")
     ap.add_argument("--status", default="pending", help="pending|posted|discarded|failed|all")
@@ -221,7 +274,7 @@ def main() -> None:
 
     args = parser.parse_args()
     {"hello": cmd_hello, "build": cmd_build, "build-next": cmd_build_next, "validate": cmd_validate,
-     "ingest": cmd_ingest, "draft-post": cmd_draft_post, "draft-status": cmd_draft_status, "approvals": cmd_approvals, "audit": cmd_audit, "approval-bot": cmd_approval_bot, "send-file": cmd_send_file, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
+     "ingest": cmd_ingest, "draft-post": cmd_draft_post, "approve": cmd_approve, "discard": cmd_discard, "edit": cmd_edit, "draft-status": cmd_draft_status, "approvals": cmd_approvals, "audit": cmd_audit, "approval-bot": cmd_approval_bot, "send-file": cmd_send_file, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
 
 
 if __name__ == "__main__":

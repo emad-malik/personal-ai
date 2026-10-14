@@ -129,3 +129,26 @@ def test_status_update_text(tmp_path):
     memory.set_status("Cleaning", "done", db)
     t = planner.status_update(date(2026, 10, 16), db)
     assert "Done: Cleaning" in t and "KNN, due 2026-10-28, Lena" in t
+
+
+def test_draft_post_cli_default_sends_no_dm(monkeypatch):
+    import argparse
+    from copilot import cli
+
+    monkeypatch.setattr(approval_bot, "notify",
+                        lambda *a, **k: (_ for _ in ()).throw(AssertionError("no DM expected")))
+    cli.cmd_draft_post(argparse.Namespace(text="hi", channel="home", buttons=False))
+    assert approvals.list_by_status("pending")[0]["body"] == "hi"
+
+
+def test_approve_cli_posts_after_decision(monkeypatch, capsys):
+    import argparse
+    from copilot import cli
+
+    c = FakeClient()
+    monkeypatch.setattr(cli, "_slack_client", lambda: c)
+    did = approvals.create_draft("ship it")
+    cli.cmd_approve(argparse.Namespace(id=did))
+    cli.cmd_approve(argparse.Namespace(id=did))          # second call must not repost
+    assert channel_posts(c) == [("CHOME", "ship it")]
+    assert "already handled" in capsys.readouterr().out

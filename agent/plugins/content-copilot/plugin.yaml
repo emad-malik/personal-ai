@@ -1,0 +1,3 @@
+name: content-copilot
+version: "0.1"
+description: Deterministic tools, an approval gate and an audit trail for the Content Dev Copilot.

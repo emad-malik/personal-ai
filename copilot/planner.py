@@ -86,7 +86,8 @@ def build_constraints(topic: str, db_path: str | None = None) -> str:
     return "; ".join(re.sub(r"\s+", " ", c["summary"]) for c in ctx)
 
 
-def status_update(today: date | None = None, db_path: str | None = None) -> str:
+def status_update(today: date | None = None, db_path: str | None = None,
+                  note: str | None = None) -> str:
     """Plain-text weekly status for the channel, built from memory (no LLM)."""
     today = today or date.today()
     items = due_list(today, db_path)
@@ -100,4 +101,6 @@ def status_update(today: date | None = None, db_path: str | None = None) -> str:
         lines.append(f"- {d['topic']}, due {d['due_date']}, {d['owner'] or 'unassigned'}{moved}")
     if cancelled:
         lines.append("Dropped: " + ", ".join(d["topic"] for d in cancelled))
+    if note and note.strip():
+        lines.append(f"Note: {note.strip()}")
     return "\n".join(lines)

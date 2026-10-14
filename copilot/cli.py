@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from datetime import date
@@ -96,6 +97,7 @@ def cmd_draft_post(args: argparse.Namespace) -> None:
     draft_id = approvals.create_draft(args.text, channel=args.channel)
     print(f"Draft #{draft_id} queued (pending approval). Nothing has been posted.")
     print(f"Draft text:\n{args.text}")
+    print("DRAFT_JSON " + json.dumps({"id": draft_id, "text": args.text.strip()}))
     if args.buttons:  # optional: Block Kit buttons via a separate approvals app
         from copilot import approval_bot
 
@@ -147,10 +149,17 @@ def cmd_edit(args: argparse.Namespace) -> None:
 def cmd_draft_status(args: argparse.Namespace) -> None:
     from copilot import planner
 
-    args.text = planner.status_update(date.fromisoformat(args.today) if args.today else None)
+    args.text = planner.status_update(date.fromisoformat(args.today) if args.today else None,
+                                      note=args.note)
     args.channel = "home"
-    print(args.text, "\n")
     cmd_draft_post(args)
+
+
+def cmd_tool_audit(args: argparse.Namespace) -> None:
+    from pathlib import Path
+    f = Path("outputs/tool_audit.jsonl")
+    for line in (f.read_text(encoding="utf-8").splitlines()[-args.limit:] if f.exists() else []):
+        print(line)
 
 
 def cmd_approvals(args: argparse.Namespace) -> None:
@@ -250,6 +259,7 @@ def main() -> None:
 
     ds = sub.add_parser("draft-status", help="Queue this week's status update for approval")
     ds.add_argument("--today", help="YYYY-MM-DD")
+    ds.add_argument("--note", help="Extra line appended word for word")
     ds.add_argument("--buttons", action="store_true", help="Also DM Block Kit buttons")
 
     ap = sub.add_parser("approvals", help="List drafts")
@@ -257,6 +267,9 @@ def main() -> None:
 
     au = sub.add_parser("audit", help="Show the audit log")
     au.add_argument("--limit", type=int, default=30)
+
+    ta = sub.add_parser("tool-audit", help="Show the agent tool-call audit trail")
+    ta.add_argument("--limit", type=int, default=30)
 
     sub.add_parser("approval-bot", help="Run the Approve/Edit/Discard button listener")
 
@@ -274,7 +287,7 @@ def main() -> None:
 
     args = parser.parse_args()
     {"hello": cmd_hello, "build": cmd_build, "build-next": cmd_build_next, "validate": cmd_validate,
-     "ingest": cmd_ingest, "draft-post": cmd_draft_post, "approve": cmd_approve, "discard": cmd_discard, "edit": cmd_edit, "draft-status": cmd_draft_status, "approvals": cmd_approvals, "audit": cmd_audit, "approval-bot": cmd_approval_bot, "send-file": cmd_send_file, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
+     "ingest": cmd_ingest, "draft-post": cmd_draft_post, "approve": cmd_approve, "discard": cmd_discard, "edit": cmd_edit, "draft-status": cmd_draft_status, "approvals": cmd_approvals, "audit": cmd_audit, "tool-audit": cmd_tool_audit, "approval-bot": cmd_approval_bot, "send-file": cmd_send_file, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
 
 
 if __name__ == "__main__":

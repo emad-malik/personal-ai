@@ -79,6 +79,14 @@ def cmd_validate(args: argparse.Namespace) -> None:
     sys.exit(0 if result["ok"] else 1)
 
 
+def cmd_send_file(args: argparse.Namespace) -> None:
+    from copilot import slack_send
+
+    link = slack_send.upload_file(args.path, user_id=args.user, channel=args.channel,
+                                  comment=args.comment)
+    print(f"Uploaded {os.path.basename(args.path)} to Slack. {link}")
+
+
 def cmd_ingest(args: argparse.Namespace) -> None:
     from copilot import memory, slack_reader
 
@@ -133,6 +141,12 @@ def main() -> None:
     v.add_argument("path")
     v.add_argument("--nano", action="store_true")
 
+    f = sub.add_parser("send-file", help="Upload a file to Slack (DM to you by default)")
+    f.add_argument("path")
+    f.add_argument("--user", help="Slack member ID (default: first SLACK_ALLOWED_USERS)")
+    f.add_argument("--channel", help="Channel ID instead of a DM")
+    f.add_argument("--comment")
+
     i = sub.add_parser("ingest", help="Extract deadlines, decisions, feedback into memory")
     src = i.add_mutually_exclusive_group(required=True)
     src.add_argument("--seed", action="store_true", help="Read demo/seed_messages.json")
@@ -147,7 +161,7 @@ def main() -> None:
 
     args = parser.parse_args()
     {"hello": cmd_hello, "build": cmd_build, "build-next": cmd_build_next, "validate": cmd_validate,
-     "ingest": cmd_ingest, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
+     "ingest": cmd_ingest, "send-file": cmd_send_file, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
 
 
 if __name__ == "__main__":

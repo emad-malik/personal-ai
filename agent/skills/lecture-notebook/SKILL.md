@@ -25,12 +25,12 @@ no em dashes) and the remembered Slack decisions (dataset, scope, reviewer feedb
 3. The build makes about 10 model calls and takes a few minutes. Run it in the
    background and poll the process, do not give up on a slow command.
 4. When it finishes, read the line starting with "Notebook file:" and the line
-   "Memory constraints:". Reply with:
-   - the topic and its due date,
-   - which remembered decisions were applied,
-   - the absolute notebook path written as plain text, not in backticks or a code
-     block, so the gateway uploads the file to the chat.
-5. Never paste the notebook contents into the chat.
+   "Memory constraints:". Then upload the notebook to the user. The chat gateway
+   does not upload .ipynb files on its own, so use our uploader:
+   `cd ~/code/personal-ai && uv run python -m copilot.cli send-file "<Notebook file path>" --comment "<topic>, due <date>"`
+5. Reply with the topic and due date, which remembered decisions were applied, and
+   confirm the upload. Do not write the file path as plain text, and never paste the
+   notebook contents into the chat.
 
 ## Pitfalls
 - Run commands from ~/code/personal-ai so the .env and outputs/ folder are found.
@@ -38,5 +38,5 @@ no em dashes) and the remembered Slack decisions (dataset, scope, reviewer feedb
 - Add `--validate` only if the user asks for an execution check.
 
 ## Verification
-The reply names a real file under ~/code/personal-ai/outputs/ and lists the
-constraints that came from memory.
+The send-file command printed "Uploaded ..." and the reply lists the constraints
+that came from memory.

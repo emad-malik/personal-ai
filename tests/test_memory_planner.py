@@ -80,3 +80,29 @@ def test_parse_json_handles_think_fences_and_truncation():
     assert slack_reader._parse_json('[{"kind":"decision","topic":"general"}]')[0]["kind"] == "decision"
     assert slack_reader._parse_json('[{"kind":"deadline","topic":"A"') is None  # truncated
     assert slack_reader._parse_json("") is None
+
+
+def test_send_file_uses_dm_and_uploads(tmp_path, monkeypatch):
+    from copilot import slack_send
+
+    f = tmp_path / "a.ipynb"
+    f.write_text("{}")
+    monkeypatch.setenv("SLACK_ALLOWED_USERS", "U123,U456")
+
+    class FakeClient:
+        def conversations_open(self, users):
+            assert users == "U123"
+            return {"channel": {"id": "D1"}}
+
+        def files_upload_v2(self, **kw):
+            assert kw["channel"] == "D1" and kw["title"] == "a.ipynb"
+            return {"file": {"permalink": "https://x/y"}}
+
+    assert slack_send.upload_file(str(f), client=FakeClient()) == "https://x/y"
+
+
+def test_send_file_missing(tmp_path):
+    import pytest
+    from copilot import slack_send
+    with pytest.raises(FileNotFoundError):
+        slack_send.upload_file(str(tmp_path / "nope.ipynb"), client=object())

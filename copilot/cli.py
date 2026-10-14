@@ -5,6 +5,7 @@ Usage:
     python -m copilot.cli build "Linear Regression" -c "use Titanic"
     python -m copilot.cli ingest --seed          # extract memory from demo/seed_messages.json
     python -m copilot.cli ingest --slack         # extract memory from the live channel
+    python -m copilot.cli build-next             # next due topic, with remembered decisions
     python -m copilot.cli plan --today 2026-10-17
     python -m copilot.cli memory
 """
@@ -12,6 +13,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import date
 
@@ -50,6 +52,21 @@ def cmd_build(args: argparse.Namespace) -> None:
             print(f"  Cell {e['cell_index']}: {e['error']}")
     else:
         print(f"\nNotebook saved (validation skipped): {path}")
+    print(f"Notebook file: {os.path.abspath(path)}")
+
+
+def cmd_build_next(args: argparse.Namespace) -> None:
+    """Build the next due topic that has no notebook yet, using remembered constraints."""
+    from copilot import planner
+
+    nxt = planner.next_to_build(date.today(), output_dir=args.output_dir)
+    if nxt is None:
+        print("Nothing to build: every active deadline already has a notebook.")
+        return
+    print(f"Next due: {nxt['topic']} (due {nxt['due_date']}, owner {nxt['owner']})")
+    args.topic = nxt["topic"]
+    args.use_memory = True
+    cmd_build(args)
 
 
 def cmd_validate(args: argparse.Namespace) -> None:
@@ -106,6 +123,12 @@ def main() -> None:
     b.add_argument("--use-memory", action="store_true",
                    help="Add remembered decisions and feedback to the constraints")
 
+    n = sub.add_parser("build-next", help="Build the next due topic using memory")
+    n.add_argument("--constraints", "-c")
+    n.add_argument("--output-dir", "-o", default="outputs")
+    n.add_argument("--nano", action="store_true")
+    n.add_argument("--validate", action="store_true")
+
     v = sub.add_parser("validate", help="Execute and repair a notebook")
     v.add_argument("path")
     v.add_argument("--nano", action="store_true")
@@ -123,7 +146,7 @@ def main() -> None:
     sub.add_parser("memory", help="Dump stored memory")
 
     args = parser.parse_args()
-    {"hello": cmd_hello, "build": cmd_build, "validate": cmd_validate,
+    {"hello": cmd_hello, "build": cmd_build, "build-next": cmd_build_next, "validate": cmd_validate,
      "ingest": cmd_ingest, "plan": cmd_plan, "memory": cmd_memory}[args.command](args)
 
 

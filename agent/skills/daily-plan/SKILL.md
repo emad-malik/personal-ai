@@ -1,14 +1,31 @@
+---
+name: daily-plan
+description: Read the bootcamp content channel into memory and report what is due, what changed, and what to build next. Use for "what is due", "plan for today", "what changed", or a morning plan.
+version: 0.1.0
+---
+
 # Daily Plan
 
-Generate a prioritized daily content development plan based on Slack channel
-context, deadlines, and pending tasks.
+Reports from the project's own memory. Do not work out dates yourself. The plan
+command sorts deadlines and applies changes exactly.
 
-## Trigger
-- Scheduled: every morning at 8:00 AM
-- On demand: user asks for today's plan
+## When to Use
+- "what's due", "plan for today", "what changed since yesterday"
+- a scheduled morning plan
 
-## Steps
-1. Query memory for open tasks and upcoming deadlines.
-2. Check Slack for overnight messages.
-3. Prioritize by deadline proximity and dependencies.
-4. Output a numbered plan with estimated effort per item.
+## Procedure
+1. Refresh memory from Slack:
+   `cd ~/code/personal-ai && uv run python -m copilot.cli ingest --slack --reset`
+2. Print the plan:
+   `cd ~/code/personal-ai && uv run python -m copilot.cli plan`
+3. Reply with the plan in short plain text: due list (soonest first, with owner and any
+   moved dates), changes since yesterday, and the proposed build. End by asking
+   whether to build the proposed notebook.
+
+## Pitfalls
+- Ingest takes a minute. Wait for it.
+- Never post to the channel. Only reply to the person who asked. Channel posts need
+  the approval queue (added in a later stage).
+
+## Verification
+The due list in the reply matches the "Due" section printed by the plan command.

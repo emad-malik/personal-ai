@@ -150,7 +150,7 @@ def run_cli(*args: str, timeout: int = 120) -> dict:
     else:
         cmd = [shutil.which("uv") or "uv", "run", "python", "-m", "copilot.cli", *args]
     env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
-    pylibs = os.getenv("COPILOT_PYLIBS")  # sandbox: deps installed with pip --target
+    pylibs = os.getenv("COPILOT_PYLIBS") or ("/sandbox/pylibs" if Path("/sandbox/pylibs").is_dir() else "")
     if pylibs and not venv_python.exists():
         cmd = [sys.executable, "-m", "copilot.cli", *args]
         env["PYTHONPATH"] = f"{pylibs}:{REPO}"

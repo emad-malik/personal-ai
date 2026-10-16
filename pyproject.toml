@@ -21,6 +21,9 @@ dev = [
     "ruff>=0.4",
 ]
 
+[tool.setuptools]
+packages = ["copilot", "copilot.notebook"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

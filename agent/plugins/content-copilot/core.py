@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import threading
 import time
 from pathlib import Path
@@ -148,9 +149,14 @@ def run_cli(*args: str, timeout: int = 120) -> dict:
         cmd = [str(venv_python), "-m", "copilot.cli", *args]
     else:
         cmd = [shutil.which("uv") or "uv", "run", "python", "-m", "copilot.cli", *args]
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+    pylibs = os.getenv("COPILOT_PYLIBS")  # sandbox: deps installed with pip --target
+    if pylibs and not venv_python.exists():
+        cmd = [sys.executable, "-m", "copilot.cli", *args]
+        env["PYTHONPATH"] = f"{pylibs}:{REPO}"
     try:
         p = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True, timeout=timeout,
-                           env={**os.environ, "PYTHONIOENCODING": "utf-8"})
+                           env=env)
     except subprocess.TimeoutExpired:
         return {"ok": False, "output": "", "error": f"timed out after {timeout}s"}
     return {"ok": p.returncode == 0, "output": p.stdout[-6000:], "error": p.stderr[-800:]}

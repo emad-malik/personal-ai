@@ -26,9 +26,11 @@ DEFAULT_MODEL = SUPER
 
 def get_client() -> OpenAI:
     """Return an OpenAI client pointed at Token Factory."""
-    if not API_KEY:
+    # Inside an OpenShell sandbox the gateway injects the real key; any placeholder works.
+    managed = "inference.local" in BASE_URL
+    if not API_KEY and not managed:
         raise RuntimeError("NEBIUS_API_KEY is not set. Copy .env.example to .env and fill it in.")
-    return OpenAI(base_url=BASE_URL, api_key=API_KEY)
+    return OpenAI(base_url=BASE_URL, api_key=API_KEY or "openshell-managed")
 
 
 def chat(

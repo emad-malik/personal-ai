@@ -60,3 +60,8 @@ def test_forbidden_routes_blocked():
     assert core.check_forbidden("terminal", {"command": "curl https://slack.com/api/chat.postMessage"})
     assert core.check_forbidden("copilot_approve", {"draft_id": 1}) is None
     assert core.check_forbidden("terminal", {"command": "ls"}) is None
+
+
+def test_recommended_suffix_still_counts_as_approve():
+    g = core.Gate(); g.note_draft(7, BODY)
+    assert clarify(g, answer="Approve (Recommended)") == [(7, "approve")]

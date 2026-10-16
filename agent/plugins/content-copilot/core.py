@@ -111,7 +111,7 @@ class Gate:
         for i, resp in enumerate(data.get("responses") or []):
             if not isinstance(resp, dict) or resp.get("status") != "answered":
                 continue
-            answer = _norm(str(resp.get("user_response", "")))
+            answer = re.sub(r"\s*\(recommended\)$", "", _norm(str(resp.get("user_response", ""))))
             if answer not in {"approve", "edit", "discard"}:
                 continue
             asked = " ".join(_strings(questions[i])) if i < len(questions) else ""
@@ -171,7 +171,7 @@ def _draft_from(out: dict) -> dict | None:
 
 ASK_NEXT = ("Now call the clarify tool with ONE question that contains the line "
             "'Draft #{id}' and the full draft text copied exactly, with choices exactly "
-            "['Approve', 'Edit', 'Discard']. Do not ask anything else first.")
+            "['Approve', 'Edit', 'Discard'] with no extra words such as '(Recommended)'. Do not ask anything else first.")
 
 
 def _drafted(out: dict, gate: Gate) -> str:

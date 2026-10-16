@@ -74,7 +74,7 @@ def build_blocks(draft: dict) -> list[dict]:
 
 def _refresh(client, draft_id: int) -> None:
     d = approvals.get(draft_id)
-    if d and d.get("dm_channel") and d.get("dm_ts"):
+    if client is not None and d and d.get("dm_channel") and d.get("dm_ts"):
         client.chat_update(channel=d["dm_channel"], ts=d["dm_ts"],
                            text=f"Draft post #{d['id']} ({d['status']})",
                            blocks=build_blocks(d))

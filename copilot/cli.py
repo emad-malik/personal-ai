@@ -106,9 +106,11 @@ def cmd_draft_post(args: argparse.Namespace) -> None:
 
 
 def _slack_client():
+    """None when no token is set (for example inside the sandbox)."""
     from slack_sdk import WebClient
 
-    return WebClient(token=os.environ["SLACK_BOT_TOKEN"])
+    token = os.environ.get("SLACK_BOT_TOKEN")
+    return WebClient(token=token) if token else None
 
 
 def _human() -> str:
@@ -124,7 +126,12 @@ def cmd_approve(args: argparse.Namespace) -> None:
     """Post a pending draft to the channel. Run only after the person chose Approve."""
     from copilot import approval_bot
 
-    result = approval_bot.on_approve(_slack_client(), args.id, _human())
+    client = _slack_client()
+    if client is None:
+        print(f"Draft #{args.id} NOT posted: Slack is not reachable from this environment "
+              "(no SLACK_BOT_TOKEN). The draft is still pending.")
+        raise SystemExit(1)
+    result = approval_bot.on_approve(client, args.id, _human())
     print({"posted": f"Draft #{args.id} posted to the channel.",
            "already_handled": f"Draft #{args.id} was already handled. Nothing posted.",
            "failed": f"Draft #{args.id} failed to post. See: copilot.cli approvals --status failed",
